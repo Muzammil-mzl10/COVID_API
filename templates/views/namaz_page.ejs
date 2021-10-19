@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Ubuntu+Condensed&display=swap');
+    </style>
+    <link rel="shortcut icon" href="mosque.png" type="image/x-icon">
+    <script type="module" src="https://unpkg.com/ionicons@4.5.10-0/dist/ionicons/ionicons.esm.js"></script>
+    <link rel="stylesheet" href="npage.css">
+
+
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+
+    <script src="//cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <link href="//cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css" rel="stylesheet">
+
+    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#myTable').DataTable({
+                "createdRow": function(row, data, dataIndex) {
+                    // if( data[2] ==  `someVal`){
+
+                    $(row).addClass('tabs1');
+                    // }
+                },
+                dom: 'Bfrtip',
+                buttons: [
+
+                    {
+                        extend: 'excelHtml5',
+                        title: 'Namaz Timing',
+                        "className": 'btn btn-success rounded-pill mx-3 fs-6'
+                    }, {
+                        extend: 'pdfHtml5',
+                        title: 'Namaz Timing',
+                        "className": 'btn btn-danger rounded-pill fs-6'
+                    }
+                ]
+            });
+        });
+    </script>
+    <title>Namaz-Timings</title>
+
+
+</head>
+<script>
+    function getData() {
+        fetch('https://api.openweathermap.org/data/2.5/weather?q=<%- city2 %>&units=metric&appid=e500e16c6e7a46f7da2ce99ac36b9ac6').then((resp) => {
+            return resp.json();
+        }).then((data) => {
+            // console.log(data.main);
+            if (data.main == undefined) {
+                document.getElementById("temp").innerText = "25";
+                document.getElementsByClassName("weather")[0].src = `http://openweathermap.org/img/w/04d.png`;
+                document.getElementById("type").innerText = "Clouds";
+                document.getElementById("dn").innerText = "D/N";
+            } else {
+                document.getElementById("temp").innerText = `${data.main.temp}`;
+                document.getElementsByClassName("weather")[0].src = `http://openweathermap.org/img/w/${data.weather[0].icon}.png`;
+                document.getElementById("type").innerText = `${data.weather[0].main}`;
+                if (data.weather[0].icon.includes("d")) {
+                    document.getElementById("dn").innerText = "Day";
+
+                } else {
+                    document.getElementById("dn").innerText = "Night";
+
+                }
+            }
+
+
+            // data1 = data.data
+        })
+    }
+    getData();
+</script>
+
+<body>
+    <header class=" d-flex flex-wrap justify-content-center m-3 head rounded-pill">
+        <div class="text-dark text-center " style="width: 350px;">
+            <div class="fs-3 fw-bold box1">
+                <ion-icon name="locate" class="fs-5 fw-bold text-danger"></ion-icon>
+                <%- city1 %>
+            </div>
+            <div id="Date" class="fs-5"></div>
+        </div>
+        <div class="text-dark text-center" style="width: 350px;">
+            <div class="fs-3 box1 fw-bold">
+                <img src="" class="weather"></img>
+                <span id="temp"></span>
+                <span>&#8451</span>
+            </div>
+            <div class="fs-5">
+                <span id="dn"></span> |
+                <span id="type"></span> |
+                <span> <%- obj.data[0].date.hijri.month.ar %> </span>
+            </div>
+        </div>
+    </header>
+    <section class="d-flex justify-content-center flex-wrap p-3">
+        <div class="text-dark mx-3 card1 mb-3" style="width: 250px;">
+            <div class="card-header d-flex justify-content-center fw-bold fs-5">Today Namaz Time &#128331</div>
+            <ul class="fw-bold">
+                <% for(var i=0; i<obj.data.length; i++) {%>
+                    <% if(obj.data[i].date.gregorian.date.split("-")[0] == date1)
+                        { %>
+                        <li>
+                            <div style="width: 70px;" class="d-inline-block"> Fajr </div>
+                            <ion-icon name="arrow-round-forward" class="icon1"></ion-icon> &nbsp&nbsp&nbsp
+                            <%= obj.data[i].timings.Fajr.split(" ")[0] %> AM
+                        </li>
+                        <li>
+                            <div style="width: 70px;" class="d-inline-block"> Sunrise </div>
+                            <ion-icon name="arrow-round-forward" class="icon1"></ion-icon> &nbsp&nbsp&nbsp
+                            <%= obj.data[i].timings.Sunrise.split(" ")[0] %> AM
+                        </li>
+                        <li>
+                            <div style="width: 70px;" class="d-inline-block">Dhuhr </div>
+                            <ion-icon name="arrow-round-forward" class="icon1"></ion-icon> &nbsp&nbsp&nbsp
+                            <%= obj.data[i].timings.Dhuhr.split(" ")[0] %> PM
+                        </li>
+                        <li>
+                            <div style="width: 70px;" class="d-inline-block">Asr</div>
+                            <ion-icon name="arrow-round-forward" class="icon1"></ion-icon> &nbsp&nbsp&nbsp
+                            <%= obj.data[i].timings.Asr.split(" ")[0] %> PM
+                        </li>
+                        <li>
+                            <div style="width: 70px;" class="d-inline-block">Sunset</div>
+                            <ion-icon name="arrow-round-forward" class="icon1"></ion-icon> &nbsp&nbsp&nbsp
+                            <%= obj.data[i].timings.Sunset.split(" ")[0] %> PM
+                        </li>
+                        <li>
+                            <div style="width: 70px;" class="d-inline-block">Maghrib</div>
+                            <ion-icon name="arrow-round-forward" class="icon1"></ion-icon> &nbsp&nbsp&nbsp
+                            <%= obj.data[i].timings.Maghrib.split(" ")[0] %> PM
+                        </li>
+                        <li>
+                            <div style="width: 70px;" class="d-inline-block">Isha</div>
+                            <ion-icon name="arrow-round-forward" class="icon1"></ion-icon> &nbsp&nbsp&nbsp
+                            <%= obj.data[i].timings.Isha.split(" ")[0] %> PM
+                        </li>
+                        <li>
+                            <div style="width: 70px;" class="d-inline-block">Imsak</div>
+                            <ion-icon name="arrow-round-forward" class="icon1"></ion-icon> &nbsp&nbsp&nbsp
+                            <%= obj.data[i].timings.Imsak.split(" ")[0] %> AM
+                        </li>
+                        <li>
+                            <div style="width: 70px;" class="d-inline-block">Midnight</div>
+                            <ion-icon name="arrow-round-forward" class="icon1"></ion-icon> &nbsp&nbsp&nbsp
+                            <%= obj.data[i].timings.Midnight.split(" ")[0] %> AM
+                        </li>
+                        <% break; }%>
+                            <% } %>
+            </ul>
+        </div>
+        <div class="text-dark mx-3 mb-3 card1" style="max-width: 335; max-width: 230;">
+            <div class="card-header fs-5 fw-bold text-center">
+                <%- city1 %> - Map &#127759</div>
+            <div class="card-body text-center">
+                <iframe class="rounded-1" src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d13611.169753645509!2d<%= obj.data[0].meta.longitude %>!3d<%= obj.data[0].meta.latitude %>!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2s!4v1627539067273!5m2!1sen!2s"
+                    min-width="225" max-width="325" height="200" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+            </div>
+        </div>
+    </section>
+    <main class="table-responsive m-1 p-1 rounded d-flex justify-content-center flex-column">
+        <div class="full fw-bold fs-4 d-flex justify-content-center">
+            Full Month Namaz Time
+        </div>
+        <table class="table tabs table-hover" id="myTable">
+            <thead>
+                <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Fajr</th>
+                    <th scope="col">Sunrise</th>
+                    <th scope="col">Dhuhr</th>
+                    <th scope="col">Asr</th>
+                    <th scope="col">Maghrib</th>
+                    <th scope="col">Isha</th>
+                    <th scope="col">Imsak</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% for(var i=0; i<obj.data.length; i++) {%>
+                    <tr>
+                        <td scope="row" class="fw-bold">
+                            <%= obj.data[i].date.readable %>
+                        </td>
+                        <td>
+                            <%= obj.data[i].timings.Fajr.split(" ")[0] %> AM
+                        </td>
+                        <td>
+                            <%= obj.data[i].timings.Sunrise.split(" ")[0] %> AM
+                        </td>
+                        <td>
+                            <%= obj.data[i].timings.Dhuhr.split(" ")[0] %> PM
+                        </td>
+                        <td>
+                            <%= obj.data[i].timings.Asr.split(" ")[0] %> PM
+                        </td>
+                        <td>
+                            <%= obj.data[i].timings.Maghrib.split(" ")[0] %> PM
+                        </td>
+                        <td>
+                            <%= obj.data[i].timings.Isha.split(" ")[0] %> PM
+                        </td>
+                        <td>
+                            <%= obj.data[i].timings.Imsak.split(" ")[0] %> AM
+                        </td>
+                    </tr>
+                    <% } %>
+
+            </tbody>
+        </table>
+    </main>
+    <div class="text-center mb-3">
+        <button class="btn btn-light fs-6 fw-bolder-4 fw-bold rounded-pill" onclick="goBack()">Go Back</button>
+    </div>
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+    <footer class="fw-bold fs-6 d-flex justify-content-center text-light p-4">
+        Copyright © 2021
+        <% if (year !== 2021) {%>
+            -
+            <%- year %>
+                <% } %>
+                    <a href="https://github.com/Azeemaj101" target="_blank" rel="noopener noreferrer">
+                        <ion-icon name="logo-github" class="icon"></ion-icon>
+                    </a>
+    </footer>
+    <!-- Optional JavaScript; choose one of the two! -->
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+
+    <% var a = obj.data[0].meta.timezone %>
+        <script>
+            setInterval(() => {
+                var objToday = new Date();
+                // var objToday = convertTZ(date, "<%- a %>");
+                var time = objToday.toLocaleString('en-US', {
+                    timeZone: "<%- a %>"
+                });
+                var todayNY = new Date(time);
+                var unicode = '&#128337';
+                var arr = time.split(",");
+                var weekday = new Array('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'),
+                    dayOfWeek = weekday[todayNY.getDay()],
+                    domEnder = function() {
+                        var a = objToday;
+                        if (/1/.test(parseInt((a + "").charAt(0)))) return "th";
+                        a = parseInt((a + "").charAt(1));
+                        return 1 == a ? "st" : 2 == a ? "nd" : 3 == a ? "rd" : "th"
+                    },
+                    months = new Array('Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'),
+                    curMonth = months[arr[0].split("/")[0] - 1];
+                var today = `${dayOfWeek} | ${curMonth} ${arr[0].split("/")[1]} | ${unicode} ${arr[1].split(" ")[1].split(":")[0]}:${arr[1].split(" ")[1].split(":")[1]}:${arr[1].split(" ")[1].split(":")[2]} ${arr[1].split(" ")[2]}`;
+                document.getElementById("Date").innerHTML = today;
+            }, 1000);
+        </script>
+</body>
+
+</html>
